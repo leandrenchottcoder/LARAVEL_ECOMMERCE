@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Commande;
 use App\Models\Contact;
+use App\Models\Repas;
 use Illuminate\Foundation\Auth\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -70,8 +71,9 @@ class IndexController extends Controller
         return view('liste');
     }
     public function repas(){
+        $repas = Repas::all();
 
-        return view('ecommerce.repas');
+        return view('ecommerce.repas', compact('repas'));
     }
     public function about(){
 

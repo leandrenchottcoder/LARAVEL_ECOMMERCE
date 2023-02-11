@@ -27,6 +27,11 @@
                     </x-nav-link>
                 </div>
                 <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
+                    <x-nav-link :href="route('liste_repas')" :active="request()->routeIs('liste_repas')">
+                        {{ __('Liste de tous les repas') }}
+                    </x-nav-link>
+                </div>
+                <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
                     <x-nav-link :href="route('listeUsers')" :active="request()->routeIs('listeUsers')">
                         {{ __('Liste des utilisateurs') }}
                     </x-nav-link>

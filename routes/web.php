@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Repas;
 use App\Models\User;
 
 
@@ -12,6 +13,7 @@ use App\Models\Commande;
 use App\Models\Contact;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\File;
 // use PDF;
 
 /*
@@ -109,6 +111,82 @@ Route::get('/listeCommande', function () {
     $commandes = Commande::all();
     return view('listeCommande', compact('commandes'));
 })->middleware(['auth', 'verified'])->name('liste_commande');
+
+
+//ROUTE POUR LA LISTE DE TOUS LES REPAS DANS LE PROFIL DE L'UTILISATEUR OU ADMINISTRATEUR
+Route::get('/listeRepas', function () {
+    $repas = Repas::all();
+    return view('listeRepas', compact('repas'));
+})->middleware(['auth', 'verified'])->name('liste_repas');
+
+//ROUTE POUR CREER DES REPAS DANS LE PROFIL DE L'UTILISATEUR OU ADMINISTRATEUR
+Route::get('/createRepas', function () {
+    return view('createRepas');
+})->middleware(['auth', 'verified'])->name('create_repas');
+
+//ROUTE POUR VALIDER  UN REPAS  CREER DANS LE PROFIL DE L'UTILISATEUR OU ADMINISTRATEUR
+Route::post('/storeRepas', function (Request $request) {
+    $repas = new Repas;
+    $repas->categorie = $request->input('categorie');
+    $repas->name = $request->input('name');
+    $repas->description = $request->input('description');
+    $repas->prix = $request->input('prix');
+    $repas->rating = $request->input('rating');
+    if ($request->hasfile('profile_image')) {
+        $file = $request->file('profile_image');
+        $extention = $file->getClientOriginalExtension();
+        $filename = time() . '.' . $extention;
+        $file->move('uploads/repas/', $filename);
+        $repas->profile_image = $filename;
+    }
+    $repas->save();
+    return redirect()->back()->with('status', 'Repas et Image ajouter avec succès');
+})->middleware(['auth', 'verified'])->name('store_repas');
+
+//ROUTE POUR EDITER UN REPAS DANS LE PROFIL DE L'UTILISATEUR OU ADMINISTRATEUR
+Route::get('/editRepas/{id}', function ($id) {
+    $repas = Repas::find($id);
+    return view('editRepas', compact('repas'));
+})->middleware(['auth', 'verified'])->name('editer_repas');
+
+//ROUTE POUR VALIDER  UN REPAS EDITER DANS LE PROFIL DE L'UTILISATEUR OU ADMINISTRATEUR
+Route::put('/updateRepas/{id}', function (Request $request, $id) {
+    $repas = Repas::find($id);
+    $repas->categorie = $request->input('categorie');
+    $repas->name = $request->input('name');
+    $repas->description = $request->input('description');
+    $repas->prix = $request->input('prix');
+    $repas->rating = $request->input('rating');
+
+    if ($request->hasfile('profile_image')) {
+        $destination = 'uploads/repas/' . $repas->profile_image;
+        if (File::exists($destination)) {
+            File::delete($destination);
+        }
+        $file = $request->file('profile_image');
+        $extention = $file->getClientOriginalExtension();
+        $filename = time() . '.' . $extention;
+        $file->move('uploads/repas/', $filename);
+        $repas->profile_image = $filename;
+    }
+
+    $repas->update();
+    return redirect()->back()->with('status', 'Repas et  image modifier avec succès');
+})->middleware(['auth', 'verified'])->name('update_repas');
+
+
+//ROUTE POUR SUPPRIMER  UN REPAS  DANS LE PROFIL DE L'UTILISATEUR OU ADMINISTRATEUR
+Route::delete('/destroyRepas/{id}', function ($id) {
+    $repas = Repas::find($id);
+    $destination = 'uploads/repas/' . $repas->profile_image;
+    if (File::exists($destination)) {
+        File::delete($destination);
+    }
+    $repas->delete();
+    return redirect()->back()->with('status', 'Repas et Image supprimé avec succès');
+})->middleware(['auth', 'verified'])->name('destroy_repas');
+
+
 
 //ROUTE POUR LA LISTE DE TOUTES LES COMMANDE EN PDF DANS LE PROFIL DE L'UTILISATEUR OU ADMINISTRATEUR
 // Route::get('/listeCommandePdf', function () {
